@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radio en Vivo - Oxígeno</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="/favicon.ico">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: url('pexels-ahmetyuksek-30882618.jpg') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            animation: breathe 15s infinite ease-in-out;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            flex-grow: 1; /* Permite que el contenedor ocupe el espacio disponible */
+            justify-content: center;
+        }
+
+        .player {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(76, 0, 130, 0.329), rgba(0, 191, 255, 0.5));
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 50px rgba(0, 191, 255, 0.7);
+            position: relative;
+            overflow: hidden;
+        }
+        .player::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent);
+            animation: rotate 10s infinite linear;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .player h1 {
+            color: #fff;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+            animation: glow 2s infinite alternate;
+            position: relative;
+            z-index: 1;
+        }
+        .controls {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #00b4ff;
+            padding: 18px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 180, 255, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+        }
+        .btn:hover {
+            background: #00b4ff;
+            transform: scale(1.15);
+            box-shadow: 0 0 30px rgba(0, 180, 255, 1);
+        }
+        .btn i {
+            color: white;
+        }
+        .volume-slider {
+            width: 120px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            accent-color: #00b4ff;
+        }
+        .live-indicator {
+            color: #ff4d4d;
+            font-size: 16px;
+            margin-top: 20px;
+            text-shadow: 0 0 10px rgba(255, 77, 77, 0.8);
+            animation: pulse 1.5s infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        .social-bar {
+            display: flex;
+            gap: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+        .social-btn {
+            color: #fff;
+            font-size: 24px;
+            padding: 10px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .social-btn:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+        .social-btn.x:hover { color: #1DA1F2; }
+        .social-btn.instagram:hover { color: #E1306C; }
+        .social-btn.whatsapp:hover { color: #25D366; }
+
+        /* Copyright */
+        .copyright {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: #fff;
+            font-size: 14px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 0;
+            z-index: 1;
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 0.8; }
+        }
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes glow {
+            0% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+            100% { text-shadow: 0 0 20px rgba(255, 255, 255, 1); }
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Reproductor -->
+        <div class="player">
+            <h1>Radio Oxígeno</h1>
+            <audio id="radioPlayer" style="display: none;"></audio>
+            <div class="controls">
+                <button id="playPause" class="btn"><i class="fas fa-play"></i></button>
+        <input type="range" id="volume" class="volume-slider" min="0" max="1" step="0.01" value="1">
+        <button id="mute" class="btn"><i class="fas fa-volume-up"></i></button>
+            </div>
+            <div class="live-indicator">🔴 En Vivo</div>
+        </div>
+
+        <!-- Redes sociales -->
+        <div class="social-bar">
+            <a href="https://x.com/zenitswgg?t=mtvckSmolEwSjpwupRsxYA&s=09" target="_blank" class="social-btn x"><i class="fab fa-twitter"></i></a>
+            <a href="https://www.instagram.com/zenitswgg?igsh=MWUyZWR6bTBmNDYxag==" target="_blank" class="social-btn instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://wa.me/+51929031756" target="_blank" class="social-btn whatsapp"><i class="fab fa-whatsapp"></i></a>
+        </div>
+    </div>
+
+    <!-- Copyright -->
+    <div class="copyright">
+        © 2025 Jameswgg. Todos los derechos reservados.
+    </div>
+
+    <script>
+        const audio = document.getElementById('radioPlayer');
+        const playPauseBtn = document.getElementById('playPause');
+        const muteBtn = document.getElementById('mute');
+        const volumeSlider = document.getElementById('volume');
+        const streamUrl = 'https://mdstrm.com/audio/5fab0687bcd6c2389ee9480c/live.m3u8';
+        let isPlaying = false;
+
+        // Configurar HLS
+        let hls;
+        if (Hls.isSupported()) {
+            hls = new Hls();
+            hls.loadSource(streamUrl);
+            hls.attachMedia(audio);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                console.log("Stream listo para reproducir");
+            });
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                console.error("Error en HLS:", data);
+            });
+        } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+            audio.src = streamUrl;
+            audio.addEventListener('loadedmetadata', () => {
+                console.log("Stream nativo listo");
+            });
+        } else {
+            console.log("Tu navegador no soporta HLS.");
+        }
+
+        // Controles
+        playPauseBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                audio.pause();
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                isPlaying = false;
+            } else {
+                audio.play().then(() => {
+                    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                    isPlaying = true;
+                }).catch(err => console.error("Error al reproducir", err));
+            }
+        });
+
+        muteBtn.addEventListener('click', () => {
+            audio.muted = !audio.muted;
+            muteBtn.innerHTML = audio.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+        });
+        volumeSlider.addEventListener('input', () => {
+            audio.volume = volumeSlider.value;
+            audio.muted = (volumeSlider.value == 0);
+            muteBtn.innerHTML = audio.muted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+        });
+    </script>
+</body>
+</html>
