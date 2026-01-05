@@ -5,180 +5,278 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Radio en Vivo - Oxígeno</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <link rel="stylesheet" href="/favicon.ico">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer">
+
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: url('pexels-ahmetyuksek-30882618.jpg') no-repeat center center fixed;
-            background-size: cover;
-            font-family: 'Montserrat', sans-serif;
-            overflow: hidden;
-        }
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            animation: breathe 15s infinite ease-in-out;
+        :root{
+        --glass: rgba(30, 45, 58, .45);
+        --glass-hi: rgba(255,255,255,.10);
+        --border: rgba(130, 215, 255, .35);
+        --glow: rgba(110, 210, 255, .35);
+        --accent: #6fd3ff;
         }
 
-        .container {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 30px;
-            flex-grow: 1; /* Permite que el contenedor ocupe el espacio disponible */
-            justify-content: center;
+        *{ box-sizing:border-box; }
+
+        body{
+        margin:0;
+        min-height:100vh;
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+        align-items:center;
+        background: url('pexels-ahmetyuksek-30882618.jpg') center/cover no-repeat fixed;
+        font-family:'Montserrat', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        overflow:hidden;
+        color:#fff;
+        position:relative;
+        }
+        body::before{
+        content:'';
+        position:fixed;
+        inset:0;
+        background:
+            radial-gradient(circle at center, rgba(0,0,0,.08), rgba(0,0,0,.78)),
+            rgba(0,0,0,.10);
+        z-index:0;
+        pointer-events:none;
+        }
+        .container{
+        position:relative;
+        z-index:1;
+        width:min(560px, 92vw);
+        flex-grow:1;
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+        align-items:center;
+        gap:22px;
+        }
+        .player{
+        width:min(520px, 92vw);
+        padding:26px 26px 22px;
+        border-radius:28px;
+        background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border:1px solid var(--border);
+        box-shadow:
+            0 0 0 1px rgba(255,255,255,.06) inset,
+            0 0 34px var(--glow),
+            0 26px 60px rgba(0,0,0,.55);
+        position:relative;
+        overflow:hidden;
+        text-align:center;
+        }
+        .player::before,
+        .player::after{
+        content:"";
+        position:absolute;
+        left:10%;
+        right:10%;
+        height:2px;
+        background: linear-gradient(90deg, transparent, rgba(140,220,255,.85), transparent);
+        opacity:.75;
+        pointer-events:none;
+        }
+        .player::before{ top:6px; }
+        .player::after{ bottom:6px; }
+
+        .player h1{
+        margin:0 0 16px;
+        font-size:28px;
+        font-weight:700;
+        letter-spacing:2.5px;
+        text-transform:uppercase;
+        text-shadow: 0 0 18px rgba(255,255,255,.22);
+        }
+        .controls{
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:18px;
         }
 
-        .player {
-            width: 350px;
-            height: 350px;
-            background: radial-gradient(circle, rgba(76, 0, 130, 0.329), rgba(0, 191, 255, 0.5));
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 50px rgba(0, 191, 255, 0.7);
-            position: relative;
-            overflow: hidden;
+        .btn{
+        width:66px;
+        height:66px;
+        border-radius:50%;
+        border:1px solid rgba(130,215,255,.50);
+        background: rgba(255,255,255,.08);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        cursor:pointer;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        box-shadow:
+            0 0 0 1px rgba(255,255,255,.08) inset,
+            0 0 24px rgba(110,210,255,.22);
+        transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
         }
-        .player::before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent);
-            animation: rotate 10s infinite linear;
-            z-index: 0;
-            pointer-events: none;
+        .btn:hover{
+        transform: scale(1.06);
+        box-shadow: 0 0 34px rgba(110,210,255,.45);
+        background: rgba(255,255,255,.11);
         }
-        .player h1 {
-            color: #fff;
-            font-size: 24px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
-            margin-bottom: 20px;
-            animation: glow 2s infinite alternate;
-            position: relative;
-            z-index: 1;
+        .btn i{ color:#fff; font-size:22px; }
+
+        .volume-slider{
+        width:min(260px, 42vw);
+        height:6px;
+        border-radius:999px;
+        outline:none;
+        -webkit-appearance:none;
+        appearance:none;
+        background: rgba(255,255,255,.18);
+        box-shadow: 0 0 0 1px rgba(255,255,255,.10) inset;
         }
-        .controls {
-            display: flex;
-            gap: 25px;
-            align-items: center;
-            position: relative;
-            z-index: 1;
+
+        .volume-slider::-webkit-slider-runnable-track{
+        height:6px;
+        border-radius:999px;
+        background: linear-gradient(90deg, var(--accent), rgba(200,245,255,.85));
         }
+        .volume-slider::-moz-range-track{
+        height:6px;
+        border-radius:999px;
+        background: linear-gradient(90deg, var(--accent), rgba(200,245,255,.85));
+        }
+
+        .volume-slider::-webkit-slider-thumb{
+        -webkit-appearance:none;
+        width:18px;
+        height:18px;
+        border-radius:50%;
+        background:#b8eeff;
+        box-shadow: 0 0 14px rgba(110,210,255,.9);
+        margin-top:-6px;
+        cursor:pointer;
+        }
+        .volume-slider::-moz-range-thumb{
+        width:18px;
+        height:18px;
+        border-radius:50%;
+        background:#b8eeff;
+        border:none;
+        box-shadow: 0 0 14px rgba(110,210,255,.9);
+        cursor:pointer;
+        }
+
+        .live-indicator{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        gap:10px;
+        padding:8px 18px;
+        border-radius:999px;
+        margin-top:16px;
+        background: rgba(255, 70, 90, .16);
+        border:1px solid rgba(255, 90, 100, .45);
+        color:#ffd0d6;
+        font-size:14px;
+        box-shadow: 0 12px 26px rgba(0,0,0,.25);
+        text-shadow:none;
+        }
+
+        .social-bar{
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:22px;
+        padding:14px 22px;
+        border-radius:999px;
+        background: rgba(255,255,255,.08);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border:1px solid rgba(130,215,255,.28);
+        box-shadow: 0 18px 45px rgba(0,0,0,.35);
+        }
+
+        .social-btn{
+        color:#fff;
+        font-size:22px;
+        text-decoration:none;
+        opacity:.9;
+        transition: transform .15s ease, opacity .15s ease, filter .15s ease;
+        }
+        .social-btn:hover{
+        transform: scale(1.15);
+        opacity:1;
+        filter: drop-shadow(0 0 10px rgba(110,210,255,.55));
+        }
+
+        .social-btn.x:hover{ color:#7bd7ff; }
+        .social-btn.instagram:hover{ color:#ff8fb5; }
+        .social-btn.whatsapp:hover{ color:#7cffb0; }
+
+        .copyright{
+        position:fixed;
+        bottom:14px;
+        left:0;
+        width:100%;
+        text-align:center;
+        font-size:14px;
+        opacity:.65;
+        background: transparent;
+        padding:0;
+        z-index:1;
+        text-shadow: 0 0 12px rgba(0,0,0,.65);
+        }
+
+        @media (max-width: 420px){
+        .player{ padding:22px 18px 18px; border-radius:24px; }
+        .player h1{ font-size:22px; letter-spacing:2px; }
+        .btn{ width:58px; height:58px; }
+        .volume-slider{ width: 44vw; min-width: 150px; }
+        }
+
         .btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid #00b4ff;
-            padding: 18px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 24px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(0, 180, 255, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 60px;
-            height: 60px;
+        position: relative;
+        color: #ffffff;
         }
-        .btn:hover {
-            background: #00b4ff;
-            transform: scale(1.15);
-            box-shadow: 0 0 30px rgba(0, 180, 255, 1);
-        }
+
         .btn i {
-            color: white;
+        font-size: 22px;
+        color: #ffffff;
+        opacity: 1;
+        filter: drop-shadow(0 0 6px rgba(120,220,255,.6));
         }
-        .volume-slider {
-            width: 120px;
-            height: 5px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 5px;
-            accent-color: #00b4ff;
-        }
-        .live-indicator {
-            color: #ff4d4d;
-            font-size: 16px;
-            margin-top: 20px;
-            text-shadow: 0 0 10px rgba(255, 77, 77, 0.8);
-            animation: pulse 1.5s infinite;
-            position: relative;
-            z-index: 1;
+
+        .btn:empty::before {
+        content: "▶";
+        font-size: 20px;
+        color: #ffffff;
         }
 
         .social-bar {
-            display: flex;
-            gap: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        position: relative;
+        z-index: 2;
+        background: rgba(255,255,255,.10);
+        border: 1px solid rgba(140,220,255,.35);
         }
+
         .social-btn {
-            color: #fff;
-            font-size: 24px;
-            padding: 10px;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            text-decoration: none;
+        color: #ffffff;
+        opacity: 0.95;
+        filter: drop-shadow(0 0 6px rgba(120,220,255,.5));
         }
+
+        .social-btn i {
+        font-size: 22px;
+        }
+
         .social-btn:hover {
-            transform: scale(1.2);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-        }
-        .social-btn.x:hover { color: #1DA1F2; }
-        .social-btn.instagram:hover { color: #E1306C; }
-        .social-btn.whatsapp:hover { color: #25D366; }
-
-        /* Copyright */
-        .copyright {
-            position: absolute;
-            bottom: 10px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            color: #fff;
-            font-size: 14px;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            background: rgba(0, 0, 0, 0.3);
-            padding: 5px 0;
-            z-index: 1;
-        }
-
-        @keyframes breathe {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 0.8; }
-        }
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        @keyframes glow {
-            0% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
-            100% { text-shadow: 0 0 20px rgba(255, 255, 255, 1); }
-        }
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.6; }
-            100% { opacity: 1; }
+        opacity: 1;
+        filter: drop-shadow(0 0 12px rgba(120,220,255,.9));
         }
     </style>
 </head>
@@ -200,7 +298,7 @@
         <div class="social-bar">
             <a href="https://x.com/zenitswgg?t=mtvckSmolEwSjpwupRsxYA&s=09" target="_blank" class="social-btn x"><i class="fab fa-twitter"></i></a>
             <a href="https://www.instagram.com/zenitswgg?igsh=MWUyZWR6bTBmNDYxag==" target="_blank" class="social-btn instagram"><i class="fab fa-instagram"></i></a>
-            <a href="https://wa.me/+51929031756" target="_blank" class="social-btn whatsapp"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://wa.me/+51902255632" target="_blank" class="social-btn whatsapp"><i class="fab fa-whatsapp"></i></a>
         </div>
     </div>
 
